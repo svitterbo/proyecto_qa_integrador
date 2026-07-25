@@ -1,0 +1,73 @@
+name: QA Suite Completa
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  db-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: ecommerce_test
+        ports:
+          - 5432:5432
+        # Healthcheck: espera a que Postgres esté realmente listo
+        # antes de dejar avanzar el resto del job
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Cargar datos de prueba
+        run: |
+          PGPASSWORD=testpass psql -h localhost -U testuser -d ecommerce_test -f setup_datos.sql
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install psycopg2-binary pytest
+
+      - name: Correr validaciones de integridad
+        env:
+          DB_HOST: localhost
+          DB_USER: testuser
+          DB_PASSWORD: testpass
+          DB_NAME: ecommerce_test
+        run: pytest tests_db/ -v
+
+  api-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pytest tests_api/ -v --html=report_api.html
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: playwright install --with-deps
+      - run: pytest tests_e2e/ -v --html=report_e2e.html
