@@ -5,8 +5,6 @@ Cada query original devolvía 0 filas si todo estaba OK;
 acá esa misma lógica se convierte en un assert.
 """
 
-from tests_db.conftest import db_cursor
-
 
 def test_no_hay_emails_duplicados(db_cursor):
     """
