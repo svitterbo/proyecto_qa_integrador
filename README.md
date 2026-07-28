@@ -88,3 +88,9 @@ Este integrador combina y reestructura 3 proyectos previos del mismo autor:
 - [proyecto_sql_testing](https://github.com/svitterbo/proyecto_sql_testing)
 - [proyecto_api](https://github.com/svitterbo/proyecto_api)
 - [proyecto_saucedemo](https://github.com/svitterbo/proyecto_saucedemo)
+
+## Reporte de ejecución
+
+Reporte generado con `pytest-html` para la suite E2E:
+
+![Reporte E2E](capturas/reporte-e2e.png)
